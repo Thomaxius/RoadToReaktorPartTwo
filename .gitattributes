@@ -1,0 +1,3 @@
+# Ensure that the mock file uses linux-style EOL
+*.real eol=lf
+mockStatusFile eol=lf

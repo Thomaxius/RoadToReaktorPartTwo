@@ -1,0 +1,146 @@
+Package: python-pkg-resources
+Status: install ok installed
+Priority: optional
+Section: python
+Installed-Size: 175
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: all
+Source: distribute
+Version: 0.6.24-1ubuntu1
+Replaces: python2.3-setuptools, python2.4-setuptools
+Provides: python2.6-setuptools, python2.7-setuptools
+Depends: python (>= 2.6), python (<< 2.8)
+Suggests: python-distribute, python-distribute-doc
+Conflicts: python-setuptools (<< 0.6c8-3), python2.3-setuptools (<< 0.6b2), python2.4-setuptools (<< 0.6b2)
+Description: Package Discovery and Resource Access using pkg_resources
+ The pkg_resources module provides an API for Python libraries to
+ access their resource files, and for extensible applications and
+ frameworks to automatically discover plugins.  It also provides
+ runtime support for using C extensions that are inside zipfile-format
+ eggs, support for merging packages that have separately-distributed
+ modules or subpackages, and APIs for managing Python's current
+ "working set" of active packages.
+Original-Maintainer: Matthias Klose <doko@debian.org>
+Homepage: http://packages.python.org/distribute
+Python-Version: 2.6, 2.7
+
+Package: tcpd
+Status: install ok installed
+Multi-Arch: foreign
+Priority: optional
+Section: net
+Installed-Size: 132
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: amd64
+Source: tcp-wrappers
+Version: 7.6.q-21
+Replaces: libwrap0 (<< 7.6-8)
+Depends: libc6 (>= 2.4), libwrap0 (>= 7.6-4~)
+Description: Wietse Venema's TCP wrapper utilities
+ Wietse Venema's network logger, also known as TCPD or LOG_TCP.
+ .
+ These programs log the client host name of incoming telnet,
+ ftp, rsh, rlogin, finger etc. requests.
+ .
+ Security options are:
+  - access control per host, domain and/or service;
+  - detection of host name spoofing or host address spoofing;
+  - booby traps to implement an early-warning system.
+Original-Maintainer: Marco d'Itri <md@linux.it>
+
+Package: libbsf-java
+Status: install ok installed
+Priority: optional
+Section: java
+Installed-Size: 130
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: all
+Version: 1:2.4.0-5
+Depends: libapache-pom-java
+Suggests: bsh, libxalan2-java, rhino
+Description: Bean Scripting Framework to support scripting languages in Java
+ Bean Scripting Framework (BSF) is a set of Java classes which provides
+ scripting language support within Java applications, and access to Java
+ objects and methods from scripting languages. BSF allows one to write JSPs in
+ languages other than Java while providing access to the Java class library. In
+ addition, BSF permits any Java application to be implemented in part (or
+ dynamically extended) by a language that is embedded within it. This is
+ achieved by providing an API that permits calling scripting language engines
+ from within Java, as well as an object registry that exposes Java objects to
+ these scripting language engines.
+ .
+ BSF supports these scripting languages:
+  * Python (using Jython)
+  * JavaScript (using rhino)
+  * XSLT Stylesheets (as a component of Apache XML project's Xalan and Xerces)
+  * BeanShell (using bsh) via its own bsf adapter
+ .
+ Support for Tcl, NetRexx is not available in this Debian
+ package since Jacl, NetRexx (non-free) are not packaged.
+Original-Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
+Homepage: http://jakarta.apache.org/bsf/
+
+Package: python
+Status: install ok installed
+Priority: important
+Section: python
+Installed-Size: 658
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: amd64
+Source: python-defaults
+Version: 2.7.3-0ubuntu2
+Replaces: python-dev (<< 2.6.5-2)
+Provides: python-ctypes, python-email, python-importlib, python-profiler, python-wsgiref
+Depends: python2.7 (>= 2.7.3), python-minimal (= 2.7.3-0ubuntu2)
+Suggests: python-doc (= 2.7.3-0ubuntu2), python-tk (= 2.7.3-0ubuntu2)
+Breaks: python-bz2 (<< 1.1-8), python-csv (<< 1.0-4), python-email (<< 2.5.5-3), update-manager-core (<< 0.200.5-2)
+Conflicts: python-central (<< 0.5.5)
+Description: interactive high-level object-oriented language (default version)
+ Python, the high-level, interactive object oriented language,
+ includes an extensive class library with lots of goodies for
+ network programming, system administration, sounds and graphics.
+ .
+ This package is a dependency package, which depends on Debian's default
+ Python version (currently v2.7).
+Homepage: http://www.python.org/
+Original-Maintainer: Matthias Klose <doko@debian.org>
+
+Package: install-info
+Status: install ok installed
+Multi-Arch: foreign
+Priority: important
+Section: doc
+Installed-Size: 218
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: amd64
+Source: texinfo
+Version: 4.13a.dfsg.1-8ubuntu2
+Replaces: texinfo (<< 4.13a.dfsg.1-2)
+Depends: libc6 (>= 2.14)
+Breaks: texinfo (<< 4.13a.dfsg.1-2)
+Description: Manage installed documentation in info format
+ The install-info utility creates the index of all installed documentation
+ in info format and makes it available to info readers.
+Original-Maintainer: Debian TeX maintainers <debian-tex-maint@lists.debian.org>
+
+Package: libgdbm3
+Status: install ok installed
+Multi-Arch: same
+Priority: important
+Section: libs
+Installed-Size: 132
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: amd64
+Source: gdbm
+Version: 1.8.3-10
+Depends: libc6 (>= 2.2.5), dpkg (>= 1.15.4) | install-info
+Pre-Depends: multiarch-support
+Description: GNU dbm database routines (runtime version)
+ GNU dbm ('gdbm') is a library of database functions that use extendible
+ hashing and works similarly to the standard UNIX 'dbm' functions.
+ .
+ The basic use of 'gdbm' is to store key/data pairs in a data file, thus
+ providing a persistent version of the 'dictionary' Abstract Data Type
+ ('hash' to perl programmers).
+Original-Maintainer: Anibal Monsalve Salazar <anibal@debian.org>
+Homepage: http://directory.fsf.org/project/gdbm/
