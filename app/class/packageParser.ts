@@ -43,22 +43,18 @@ export namespace PackageParser {
 
     const fromRawDataArr = (stringArr: string[]): Package[] => {
         let packages: Package[] = [];
-
-        for (let packageItem of stringArr) {
-            if (!isValidPackage(packageItem)) {
-                console.debug(`Invalid package, skipping. stringified packageItem: "${JSON.stringify(packageItem)}", length: ${packageItem.length}`);
-                continue;
-            }
-            const fieldsAndValues: string[] = packageItem.split(/\n(?!\s)/);
-            const _package: Package = fromFieldsAndValues(fieldsAndValues);
-            packages.push(_package);
-        };
+        stringArr
+            .filter((packageItem) => isValidPackage(packageItem))
+            .map((validPackageItem) => splitAtEOL(validPackageItem))
+            .forEach((fieldsAndValues) => packages.push(fromFieldsAndValues(fieldsAndValues)))
         return packages;
     };
 
-    const isValidPackage = (packageItem: string) => {
+    const isValidPackage = (packageItem: string): boolean => {
         return (packageItem.replace(/\n/g, '').length !== 0);
     }
+
+    const splitAtEOL = (packageItem: string): string[] => packageItem.split(/\n(?!\s)/);
 
     const fromFieldsAndValues = (fieldsAndValues: string[]): Package => {
 
@@ -138,18 +134,20 @@ export namespace PackageParser {
     };
 
     const dependencyWithAlternativeDependencies = (dependencyName: string): Dependency => {
-        let alternativeDependencyNames: string[] = dependencyName.split(" | ");
-        const dependencyToAddAlternativesToName = alternativeDependencyNames[0];
+        let dependencyNames: string[] = dependencyName.split(" | ");
+        const dependencyToAddAlternativesToName = dependencyNames[0] as string
+        const alternativeDependencyNames = dependencyNames.splice(1, dependencyNames.length)
 
         const _package: Package | undefined = getPackageByNameIfExists(dependencyToAddAlternativesToName);
 
         let _dependency: Dependency = new Dependency(dependencyToAddAlternativesToName, _package, []);
 
-        for (let _alternativeDependencyName of alternativeDependencyNames.splice(1, alternativeDependencyNames.length)) {
+        for (let _alternativeDependencyName of alternativeDependencyNames) {
             const _package: Package | undefined = getPackageByNameIfExists(_alternativeDependencyName);
             const _alternativeDependency = new AlternativeDependency(_alternativeDependencyName, _package);
             _dependency.addAlternatives(_alternativeDependency);
         };
+
         return _dependency;
     };
 
@@ -168,7 +166,7 @@ export namespace PackageParser {
     };
 
     const getDependingPackages = (packageNameForUpdating: string): Package[] | [] => {
-        const dependingPackagesArr: Package[] = [];
+        const dependingPackagesArr: Package[] = []
 
         for (const _package of _packages) {
             for (const dependency of _package.dependencies) {
