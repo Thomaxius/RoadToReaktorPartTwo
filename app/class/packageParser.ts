@@ -3,24 +3,18 @@ import { Dependency } from "./dependency";
 import { AlternativeDependency } from "./alternativeDependency";
 const fs = require('fs');
 
-interface InstalledPackage {
-    packageName: string;
-    _package: Package;
-};
-
 export abstract class PackageParser {
 
-    static _installedPackages: Array<InstalledPackage> = [];
+    static _packages: Package[] = [];
 
     static fromStatusFile(filePath: string): Package[] {
         try {
             const rawFileData: string = this.fromFile(filePath);
-            const packages: Package[] = this.fromFileContents(rawFileData);
-            this.emptyArray(this._installedPackages);
-            return packages
+            this._packages = this.fromFileContents(rawFileData);
+            return this._packages;
         }
         catch (error) {
-            throw new Error(error)
+            throw new Error(error);
         }
     };
 
@@ -42,10 +36,10 @@ export abstract class PackageParser {
 
     static fromFileContents(fileContents: string): Package[] {
         const rawDataPerPackage: string[] = fileContents.split('\n\n');
-        const packages: Package[] = this.fromRawDataArr(rawDataPerPackage);
-        this.handleDependencies(packages);
-        this.sortedAlphabetically(packages);
-        return packages;
+        this._packages = this.fromRawDataArr(rawDataPerPackage);
+        this.handleDependencies(this._packages);
+        this.sortedAlphabetically(this._packages);
+        return this._packages;
     };
 
     static fromRawDataArr(stringArr: string[]): Package[] {
@@ -58,7 +52,6 @@ export abstract class PackageParser {
             const fieldsAndValues: string[] = packageItem.split(/\n(?!\s)/);
             const _package: Package = this.fromFieldsAndValues(fieldsAndValues);
             packages.push(_package);
-            this._installedPackages.push({ packageName: _package.packageName, _package: _package });
         };
         return packages;
     };
@@ -113,15 +106,6 @@ export abstract class PackageParser {
         );
     };
 
-    static updateDependingPackages(packages: Package[]) {
-        packages.forEach((_package) => {
-            const dependingPackages: Package[] = this.getDependingPackages(_package.packageName);
-            const dependingPackageNames: string[] = dependingPackages.map((_package) => _package.packageName) as string[];
-            _package.dependingPackageNames = dependingPackageNames;
-            _package.dependingPackages = dependingPackages;
-        });
-    };
-
     static dependenciesFromString(dependenciesString: string | undefined): Dependency[] {
         if (!dependenciesString) {
             return [];
@@ -145,7 +129,7 @@ export abstract class PackageParser {
                     break;
                 };
                 case false: {
-                    const _package: Package | undefined = this.getInstalledPackageByNameIfExists(dependencyName);
+                    const _package: Package | undefined = this.getPackageByNameIfExists(dependencyName);
                     const _dependency = new Dependency(dependencyName, _package, []);
                     dependencies.indexOf(_dependency) === -1 && dependencies.push(_dependency);
                     break;
@@ -163,35 +147,44 @@ export abstract class PackageParser {
         let alternativeDependencyNames: string[] = dependencyName.split(" | ");
         const dependencyToAddAlternativesToName = alternativeDependencyNames[0];
 
-        const _package: Package | undefined = this.getInstalledPackageByNameIfExists(dependencyToAddAlternativesToName);
+        const _package: Package | undefined = this.getPackageByNameIfExists(dependencyToAddAlternativesToName);
 
         let _dependency: Dependency = new Dependency(dependencyToAddAlternativesToName, _package, []);
 
         for (let _alternativeDependencyName of alternativeDependencyNames.splice(1, alternativeDependencyNames.length)) {
-            const _package: Package | undefined = this.getInstalledPackageByNameIfExists(_alternativeDependencyName);
+            const _package: Package | undefined = this.getPackageByNameIfExists(_alternativeDependencyName);
             const _alternativeDependency = new AlternativeDependency(_alternativeDependencyName, _package);
             _dependency.addAlternatives(_alternativeDependency);
         };
         return _dependency;
     };
 
-    static getInstalledPackageByNameIfExists(packageName: string): Package | undefined {
-        const installedPackage = this._installedPackages.find((_installedPackage) => _installedPackage.packageName === packageName) as InstalledPackage | undefined;
-        return installedPackage ? installedPackage._package : undefined;
+    static updateDependingPackages(packages: Package[]) {
+        packages.forEach((_package) => {
+            const dependingPackages: Package[] = this.getDependingPackages(_package.packageName);
+            const dependingPackageNames: string[] = dependingPackages.map((_package) => _package.packageName) as string[];
+            _package.dependingPackageNames = dependingPackageNames;
+            _package.dependingPackages = dependingPackages;
+        });
+    };
+
+    static getPackageByNameIfExists(packageName: string): Package | undefined {
+        const foundPackage = this._packages.find((_package) => _package.packageName === packageName) as Package | undefined;
+        return foundPackage ? foundPackage : undefined;
     };
 
     static getDependingPackages(packageNameForUpdating: string): Package[] | [] {
         const dependingPackagesArr: Package[] = [];
 
-        for (const installedPackage of this._installedPackages) {
-            for (const dependency of installedPackage._package.dependencies) {
+        for (const _package of this._packages) {
+            for (const dependency of _package.dependencies) {
                 if (dependency.packageName === packageNameForUpdating) {
-                    dependingPackagesArr.push(installedPackage._package);
+                    dependingPackagesArr.push(_package);
                     continue;
                 }
                 for (const alternativeDependency of dependency.alternatives) {
                     if (alternativeDependency.packageName === packageNameForUpdating) {
-                        dependingPackagesArr.push(installedPackage._package);
+                        dependingPackagesArr.push(_package);
                         continue;
                     }
                 }
@@ -204,17 +197,12 @@ export abstract class PackageParser {
         return packages.sort((a, b) => a.packageName.localeCompare(b.packageName));
     };
 
-
     static parseDescription(description: string): Description {
         const synopsisEndIndex = description.indexOf("\n");
         const synopsis = description.substring(0, synopsisEndIndex);
         let longDescription = description.substring(synopsisEndIndex + 2);
 
         return { synopsis: synopsis, longDescription: longDescription };
-    };
-
-    static emptyArray(_installedPackages: InstalledPackage[]) {
-        this._installedPackages.length = 0;
     };
 };
 
