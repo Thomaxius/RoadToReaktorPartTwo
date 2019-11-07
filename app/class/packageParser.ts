@@ -19,8 +19,7 @@ export abstract class PackageParser {
     };
 
     static fromFile(filePath: string): string {
-        let data: Buffer | string = fs.readFileSync(filePath, 'UTF-8');
-        data = data.toString()
+        const data: string = fs.readFileSync(filePath, 'UTF-8').toString()
         if (data.length === 0) {
             throw new Error('File is empty');
         }
