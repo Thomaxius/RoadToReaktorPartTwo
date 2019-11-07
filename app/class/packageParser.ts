@@ -66,30 +66,29 @@ export abstract class PackageParser {
         const extraFields: ExtraFields[] = [];
         argumentsObj.extraFields = extraFields;
 
-        for (const fieldAndValue of fieldsAndValues) {
-            if (fieldAndValue.length === 0) {
-                console.debug(`Skipping field, is empty`)
-                continue
-            }
-            const delimeterIndex = fieldAndValue.indexOf(':');
-            const fieldNameInFile = fieldAndValue.substring(0, delimeterIndex);
-            let value = fieldAndValue.substring(delimeterIndex + 2);
-            const propertyEquivalentObj = fieldNamePropertyEquivalents[fieldNameInFile];
-            if (propertyEquivalentObj) {
-                const propertyName = propertyEquivalentObj.propertyEquivalent;
-                const valueParser = propertyEquivalentObj.valueParser;
-                if (valueParser) {
-                    value = valueParser(value);
+        fieldsAndValues
+            .filter((_fieldAndValue) => this.isValid(_fieldAndValue))
+            .map((validFieldsAndValues) => validFieldsAndValues.split(": ", 2))
+            .forEach(([fieldNameInFile, value]) => {
+                const propertyEquivalentObj = fieldNamePropertyEquivalents[fieldNameInFile];
+                if (propertyEquivalentObj) {
+                    const propertyName = propertyEquivalentObj.propertyEquivalent;
+                    const valueParser = propertyEquivalentObj.valueParser;
+                    if (valueParser) {
+                        value = valueParser(value);
+                    }
+                    argumentsObj[propertyName] = value;
+                } else {
+                    argumentsObj['extraFields'].push({ fieldName: fieldNameInFile, value: value });
                 }
-                argumentsObj[propertyName] = value;
-            } else {
-                argumentsObj['extraFields'].push({ fieldName: fieldNameInFile, value: value });
-            }
-        }
+
+            })
 
         const _package = new Package(argumentsObj);
         return _package;
     }
+
+    static isValid = (_fieldAndValue: string): boolean => _fieldAndValue.length !== 0
 
     static handleDependencies(packages: Package[]): void {
         this.createDependencies(packages);
@@ -111,7 +110,7 @@ export abstract class PackageParser {
             return [];
         };
         let dependencies: Dependency[] = [];
-        ;
+
         dependenciesString = this.removeVersionNumbers(dependenciesString);
         let dependenciesStringArr: string[] = dependenciesString.split(', ');
 
@@ -122,18 +121,13 @@ export abstract class PackageParser {
             }
             const hasAlternativeDependencies: boolean = dependencyName.indexOf("|") !== -1;
 
-            switch (hasAlternativeDependencies) {
-                case true: {
-                    const _dependency: Dependency = this.dependencyWithAlternativeDependencies(dependencyName);
-                    dependencies.indexOf(_dependency) === -1 && dependencies.push(_dependency);
-                    break;
-                };
-                case false: {
-                    const _package: Package | undefined = this.getPackageByNameIfExists(dependencyName);
-                    const _dependency = new Dependency(dependencyName, _package, []);
-                    dependencies.indexOf(_dependency) === -1 && dependencies.push(_dependency);
-                    break;
-                };
+            if (hasAlternativeDependencies) {
+                const _dependency: Dependency = this.dependencyWithAlternativeDependencies(dependencyName);
+                dependencies.indexOf(_dependency) === -1 && dependencies.push(_dependency);
+            } else {
+                const _package: Package | undefined = this.getPackageByNameIfExists(dependencyName);
+                const _dependency = new Dependency(dependencyName, _package, []);
+                dependencies.indexOf(_dependency) === -1 && dependencies.push(_dependency);
             };
         };
         return dependencies;
@@ -206,29 +200,29 @@ export abstract class PackageParser {
     };
 };
 
-const fieldNamePropertyEquivalents: { [key: string]: { propertyEquivalent: keyof Package, valueParser: Function | undefined } } = {
-    'Package': { propertyEquivalent: 'packageName', valueParser: undefined },
-    'Status': { propertyEquivalent: 'status', valueParser: undefined },
-    'Priority': { propertyEquivalent: 'priority', valueParser: undefined },
-    'Section': { propertyEquivalent: 'section', valueParser: undefined },
+const fieldNamePropertyEquivalents: { [key: string]: { propertyEquivalent: keyof Package, valueParser?: Function } } = {
+    'Package': { propertyEquivalent: 'packageName' },
+    'Status': { propertyEquivalent: 'status' },
+    'Priority': { propertyEquivalent: 'priority' },
+    'Section': { propertyEquivalent: 'section' },
     'Installed-Size': { propertyEquivalent: 'installedSize', valueParser: parseInt },
-    'Maintainer': { propertyEquivalent: 'maintainer', valueParser: undefined },
-    'Architecture': { propertyEquivalent: 'architecture', valueParser: undefined },
-    'Version': { propertyEquivalent: 'version', valueParser: undefined },
+    'Maintainer': { propertyEquivalent: 'maintainer' },
+    'Architecture': { propertyEquivalent: 'architecture' },
+    'Version': { propertyEquivalent: 'version' },
     'Description': { propertyEquivalent: 'description', valueParser: PackageParser.parseDescription },
-    'Original-Maintainer': { propertyEquivalent: 'originalMaintainer', valueParser: undefined },
-    'Depends': { propertyEquivalent: 'dependenciesString', valueParser: undefined },
-    'Pre-Depends': { propertyEquivalent: 'preDependenciesString', valueParser: undefined },
-    'Source': { propertyEquivalent: 'source', valueParser: undefined },
-    'Multi-Arch': { propertyEquivalent: 'multiArch', valueParser: undefined },
-    'Suggests': { propertyEquivalent: 'suggests', valueParser: undefined },
-    'Homepage': { propertyEquivalent: 'homePage', valueParser: undefined },
-    'Conflicts': { propertyEquivalent: 'conflicts', valueParser: undefined },
-    'Conffiles': { propertyEquivalent: 'confFiles', valueParser: undefined },
-    'Breaks': { propertyEquivalent: 'breaks', valueParser: undefined },
-    'Recommends': { propertyEquivalent: 'recommends', valueParser: undefined },
-    'Provides': { propertyEquivalent: 'provides', valueParser: undefined },
-    'Essential': { propertyEquivalent: 'essential', valueParser: undefined },
-    'Replaces': { propertyEquivalent: 'replaces', valueParser: undefined },
-    'Enhances': { propertyEquivalent: 'enhances', valueParser: undefined }
+    'Original-Maintainer': { propertyEquivalent: 'originalMaintainer' },
+    'Depends': { propertyEquivalent: 'dependenciesString' },
+    'Pre-Depends': { propertyEquivalent: 'preDependenciesString' },
+    'Source': { propertyEquivalent: 'source' },
+    'Multi-Arch': { propertyEquivalent: 'multiArch' },
+    'Suggests': { propertyEquivalent: 'suggests' },
+    'Homepage': { propertyEquivalent: 'homePage' },
+    'Conflicts': { propertyEquivalent: 'conflicts' },
+    'Conffiles': { propertyEquivalent: 'confFiles' },
+    'Breaks': { propertyEquivalent: 'breaks' },
+    'Recommends': { propertyEquivalent: 'recommends' },
+    'Provides': { propertyEquivalent: 'provides' },
+    'Essential': { propertyEquivalent: 'essential' },
+    'Replaces': { propertyEquivalent: 'replaces' },
+    'Enhances': { propertyEquivalent: 'enhances' }
 };
