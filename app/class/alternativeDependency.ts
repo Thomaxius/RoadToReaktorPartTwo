@@ -2,7 +2,7 @@ import { Package } from "./package";
 
 export class AlternativeDependency {
     private _packageName: string;
-    public _package?: Package;
+    private _package?: Package;
     private _isInstalled: boolean;
 
     constructor(packageName: string, _package?: Package) {
@@ -13,6 +13,22 @@ export class AlternativeDependency {
 
     public set isInstalled(isInstalled: boolean) {
         this._isInstalled = isInstalled
+    }
+
+    /**
+     * Getter package
+     * @return {Package}
+     */
+    public get package(): Package | undefined {
+        return this._package;
+    }
+
+    /**
+     * Setter package
+     * @param {Package} value
+     */
+    public set package(value: Package | undefined) {
+        this._package = value;
     }
 
     public get packageName(): string {

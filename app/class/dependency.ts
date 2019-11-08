@@ -3,7 +3,7 @@ import { Package } from "./package";
 
 export class Dependency {
     private _packageName: string;
-    public _package?: Package;
+    private _package?: Package;
     private _isInstalled: boolean;
     private _alternatives: AlternativeDependency[] = [];
 
@@ -12,6 +12,15 @@ export class Dependency {
         this._package = _package;
         this._isInstalled = _package ? true : false;
         this._alternatives = alternatives ? alternatives : [];
+    }
+
+
+    public get package(): Package | undefined {
+        return this._package;
+    }
+
+    public set package(value: Package | undefined) {
+        this._package = value;
     }
 
     public get packageName(): string {

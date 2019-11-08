@@ -149,13 +149,13 @@ export namespace PackageParser {
                     .forEach((dependency) => [joinedDependencies, dependency.alternatives]
                         .forEach((joinedDependencies) => joinedDependencies
                             .forEach((dependency: Dependency | AlternativeDependency) => {
-
                                 const _package: Package | undefined = getPackageByNameIfExists(packages, dependency.packageName)
                                 if (_package) {
                                     dependency.isInstalled = true
-                                    dependency._package = _package
+                                    dependency.package = _package
                                 }
                             })))))
+
     }
 
     const updateDependingPackages = (packages: Package[]) => {
