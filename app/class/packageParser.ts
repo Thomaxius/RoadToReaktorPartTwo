@@ -5,6 +5,8 @@ const fs = require('fs');
 
 export namespace PackageParser {
 
+    let WINDOWS_EOL = false;
+
     export const fromStatusFile = (filePath: string): Package[] => {
         try {
             const rawFileData: string = fromFile(filePath);
@@ -17,11 +19,13 @@ export namespace PackageParser {
     };
 
     const fromFile = (filePath: string): string => {
-        const data: string = fs.readFileSync(filePath, 'UTF-8')
+        let data: string = fs.readFileSync(filePath, 'UTF-8')
         if (data.length === 0) {
             throw new Error('File is empty');
         }
         if (hasWindowsLineEndings(data)) {
+            WINDOWS_EOL = true;
+            data = data.replace(/\r\n/g, "\n");
             console.warn("Warning: loaded file contains windows-style line endings. Convert to Linux (LF) if there are problems.")
         }
         return data;
@@ -144,18 +148,14 @@ export namespace PackageParser {
 
     const updateDependencyStatus = (packages: Package[]) => {
         packages
-            .forEach((_package) => [_package.dependencies, _package.preDependencies]
-                .forEach((joinedDependencies) => joinedDependencies
-                    .forEach((dependency) => [joinedDependencies, dependency.alternatives]
-                        .forEach((joinedDependencies) => joinedDependencies
-                            .forEach((dependency: Dependency | AlternativeDependency) => {
-                                const _package: Package | undefined = getPackageByNameIfExists(packages, dependency.packageName)
-                                if (_package) {
-                                    dependency.isInstalled = true
-                                    dependency.package = _package
-                                }
-                            })))))
-
+            .flatMap(p => [...p.dependencies, ...p.dependencies.flatMap(d => d.alternatives)])
+            .forEach((dependency: Dependency | AlternativeDependency) => {
+                const _package: Package | undefined = getPackageByNameIfExists(packages, dependency.packageName)
+                if (_package) {
+                    dependency.isInstalled = true
+                    dependency.package = _package
+                }
+            })
     }
 
     const updateDependingPackages = (packages: Package[]) => {
@@ -167,18 +167,23 @@ export namespace PackageParser {
         });
     };
 
-    const getDependingPackages = (packages: Package[], packageNameForUpdating: string): Package[] | [] => {
-        const dependingPackagesArr: Package[] = []
+    const getDependingPackages = (packages: Package[], packageNameForUpdating: string): Package[] => {
+        const dependingPackagesArr: Package[] = [];
 
-        packages
-            .forEach((_package) => _package.dependencies
-                .forEach((dependency) => [_package.dependencies, dependency.alternatives]
-                    .forEach((joinedDependencies) => joinedDependencies
-                        .forEach((dependency: Dependency | AlternativeDependency) => {
-                            if (dependency.packageName === packageNameForUpdating) {
-                                dependingPackagesArr.push(_package);
-                            }
-                        }))))
+        for (const _package of packages) {
+            for (const dependency of _package.dependencies) {
+                if (dependency.packageName === packageNameForUpdating) {
+                    dependingPackagesArr.push(_package);
+                    continue;
+                }
+                for (const alternativeDependency of dependency.alternatives) {
+                    if (alternativeDependency.packageName === packageNameForUpdating) {
+                        dependingPackagesArr.push(_package);
+                        continue;
+                    }
+                }
+            }
+        }
         return dependingPackagesArr;
     };
 
