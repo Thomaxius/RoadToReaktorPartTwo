@@ -5,13 +5,11 @@ const fs = require('fs');
 
 export namespace PackageParser {
 
-    let _packages: Package[] = [];
-
     export const fromStatusFile = (filePath: string): Package[] => {
         try {
             const rawFileData: string = fromFile(filePath);
-            _packages = fromFileContents(rawFileData);
-            return _packages;
+            const packages: Package[] = fromFileContents(rawFileData);
+            return packages;
         }
         catch (error) {
             throw new Error(error);
@@ -35,10 +33,10 @@ export namespace PackageParser {
 
     const fromFileContents = (fileContents: string): Package[] => {
         const rawDataPerPackage: string[] = fileContents.split('\n\n');
-        _packages = fromRawDataArr(rawDataPerPackage);
-        handleDependencies(_packages);
-        sortedAlphabetically(_packages);
-        return _packages;
+        const packages: Package[] = fromRawDataArr(rawDataPerPackage);
+        handleDependencies(packages);
+        sortedAlphabetically(packages);
+        return packages;
     };
 
     const fromRawDataArr = (stringArr: string[]): Package[] => {
@@ -88,6 +86,7 @@ export namespace PackageParser {
 
     const handleDependencies = (packages: Package[]): void => {
         createDependencies(packages);
+        updateDependencyStatus(packages);
         updateDependingPackages(packages);
     };
 
@@ -121,16 +120,11 @@ export namespace PackageParser {
                 const _dependency: Dependency = dependencyWithAlternativeDependencies(dependencyName);
                 dependencies.indexOf(_dependency) === -1 && dependencies.push(_dependency);
             } else {
-                const _package: Package | undefined = getPackageByNameIfExists(dependencyName);
-                const _dependency = new Dependency(dependencyName, _package, []);
+                const _dependency = new Dependency(dependencyName);
                 dependencies.indexOf(_dependency) === -1 && dependencies.push(_dependency);
             };
         };
         return dependencies;
-    };
-
-    const removeVersionNumbers = (dependencies: string): string => {
-        return dependencies.replace(/\s\(.*?\)/g, '');
     };
 
     const dependencyWithAlternativeDependencies = (dependencyName: string): Dependency => {
@@ -138,51 +132,63 @@ export namespace PackageParser {
         const dependencyToAddAlternativesToName = dependencyNames[0] as string
         const alternativeDependencyNames = dependencyNames.splice(1, dependencyNames.length)
 
-        const _package: Package | undefined = getPackageByNameIfExists(dependencyToAddAlternativesToName);
-
-        let _dependency: Dependency = new Dependency(dependencyToAddAlternativesToName, _package, []);
+        let _dependency: Dependency = new Dependency(dependencyToAddAlternativesToName);
 
         for (let _alternativeDependencyName of alternativeDependencyNames) {
-            const _package: Package | undefined = getPackageByNameIfExists(_alternativeDependencyName);
-            const _alternativeDependency = new AlternativeDependency(_alternativeDependencyName, _package);
+            const _alternativeDependency = new AlternativeDependency(_alternativeDependencyName);
             _dependency.addAlternatives(_alternativeDependency);
         };
 
         return _dependency;
     };
 
+    const updateDependencyStatus = (packages: Package[]) => {
+        packages
+            .forEach((_package) => [_package.dependencies, _package.preDependencies]
+                .forEach((joinedDependencies) => joinedDependencies
+                    .forEach((dependency) => [joinedDependencies, dependency.alternatives]
+                        .forEach((joinedDependencies) => joinedDependencies
+                            .forEach((dependency: Dependency | AlternativeDependency) => {
+
+                                const _package: Package | undefined = getPackageByNameIfExists(packages, dependency.packageName)
+                                if (_package) {
+                                    dependency.isInstalled = true
+                                    dependency._package = _package
+                                }
+                            })))))
+    }
+
     const updateDependingPackages = (packages: Package[]) => {
         packages.forEach((_package) => {
-            const dependingPackages: Package[] = getDependingPackages(_package.packageName);
+            const dependingPackages: Package[] = getDependingPackages(packages, _package.packageName);
             const dependingPackageNames: string[] = dependingPackages.map((_package) => _package.packageName) as string[];
             _package.dependingPackageNames = dependingPackageNames;
             _package.dependingPackages = dependingPackages;
         });
     };
 
-    const getPackageByNameIfExists = (packageName: string): Package | undefined => {
-        const foundPackage = _packages.find((_package) => _package.packageName === packageName) as Package | undefined;
+    const getDependingPackages = (packages: Package[], packageNameForUpdating: string): Package[] | [] => {
+        const dependingPackagesArr: Package[] = []
+
+        packages
+            .forEach((_package) => _package.dependencies
+                .forEach((dependency) => [_package.dependencies, dependency.alternatives]
+                    .forEach((joinedDependencies) => joinedDependencies
+                        .forEach((dependency: Dependency | AlternativeDependency) => {
+                            if (dependency.packageName === packageNameForUpdating) {
+                                dependingPackagesArr.push(_package);
+                            }
+                        }))))
+        return dependingPackagesArr;
+    };
+
+    const getPackageByNameIfExists = (packages: Package[], packageName: string): Package | undefined => {
+        const foundPackage = packages.find((_package) => _package.packageName === packageName) as Package | undefined;
         return foundPackage ? foundPackage : undefined;
     };
 
-    const getDependingPackages = (packageNameForUpdating: string): Package[] | [] => {
-        const dependingPackagesArr: Package[] = []
-
-        for (const _package of _packages) {
-            for (const dependency of _package.dependencies) {
-                if (dependency.packageName === packageNameForUpdating) {
-                    dependingPackagesArr.push(_package);
-                    continue;
-                }
-                for (const alternativeDependency of dependency.alternatives) {
-                    if (alternativeDependency.packageName === packageNameForUpdating) {
-                        dependingPackagesArr.push(_package);
-                        continue;
-                    }
-                }
-            }
-        }
-        return dependingPackagesArr;
+    const removeVersionNumbers = (dependencies: string): string => {
+        return dependencies.replace(/\s\(.*?\)/g, '');
     };
 
     const sortedAlphabetically = (packages: Package[]): Package[] => {

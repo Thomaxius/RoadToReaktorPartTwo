@@ -1,17 +1,21 @@
 import { Package } from "./package";
 
 export class AlternativeDependency {
-    private _packageName: String;
-    private _package?: Package;
+    private _packageName: string;
+    public _package?: Package;
     private _isInstalled: boolean;
 
-    constructor(packageName: String, _package?: Package) {
+    constructor(packageName: string, _package?: Package) {
         this._packageName = packageName;
         this._package = _package;
         this._isInstalled = _package ? true : false;
     }
 
-    public get packageName(): String {
+    public set isInstalled(isInstalled: boolean) {
+        this._isInstalled = isInstalled
+    }
+
+    public get packageName(): string {
         return this._packageName;
     }
 
