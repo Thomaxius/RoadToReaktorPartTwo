@@ -5,8 +5,6 @@ const fs = require('fs');
 
 export namespace PackageParser {
 
-    let WINDOWS_EOL = false;
-
     export const fromStatusFile = (filePath: string): Package[] => {
         try {
             const rawFileData: string = fromFile(filePath);
@@ -24,7 +22,6 @@ export namespace PackageParser {
             throw new Error('File is empty');
         }
         if (hasWindowsLineEndings(data)) {
-            WINDOWS_EOL = true;
             data = data.replace(/\r\n/g, "\n");
             console.warn("Warning: loaded file contains windows-style line endings. Convert to Linux (LF) if there are problems.")
         }
@@ -169,18 +166,11 @@ export namespace PackageParser {
 
     const getDependingPackages = (packages: Package[], packageNameForUpdating: string): Package[] => {
         const dependingPackagesArr: Package[] = [];
-
         for (const _package of packages) {
-            for (const dependency of _package.dependencies) {
+            for (const dependency of [..._package.dependencies, ..._package.dependencies.flatMap(d => d.alternatives)]) {
                 if (dependency.packageName === packageNameForUpdating) {
                     dependingPackagesArr.push(_package);
                     continue;
-                }
-                for (const alternativeDependency of dependency.alternatives) {
-                    if (alternativeDependency.packageName === packageNameForUpdating) {
-                        dependingPackagesArr.push(_package);
-                        continue;
-                    }
                 }
             }
         }
