@@ -2,6 +2,7 @@
 A linux installed packages -explorer app built with Node & TypeScript.
 
 [Live demo](http://pkgexplorer.santamaa.com)
+
 [Live demo2 (heroku)](https://pkgexplorer.herokuapp.com/)
 
 # Running
