@@ -1,9 +1,8 @@
 # Linux installed packages explorer
 A linux installed packages -explorer app built with Node & TypeScript.
 
-[Live demo](http://pkgexplorer.santamaa.com)
-
-[Live demo2 (heroku)](https://pkgexplorer.herokuapp.com/)
+* [Live demo](http://pkgexplorer.santamaa.com)
+* [Live demo2 (heroku)](https://pkgexplorer.herokuapp.com/)
 
 # Running
 1. Clone the repository
@@ -14,8 +13,8 @@ A linux installed packages -explorer app built with Node & TypeScript.
 
 # Endpoints
 Two api endpoints are located in:
-`/api/single/<packagename>`
-`/api/all/`
+* `/api/single/<packagename>`
+* `/api/all/`
 
 # Testing
 This app contains a few sample tests. You can run them with `npm run test`
