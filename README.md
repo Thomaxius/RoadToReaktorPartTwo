@@ -19,3 +19,5 @@ Two api endpoints are located in:
 # Testing
 This app contains a few sample tests. You can run them with `npm run test`
 
+# Notes
+The task involved only focusing on 'dependencies'. Therefore, dependencies in similar fields, such as 'suggests' and 'recommends' are not processed. 
