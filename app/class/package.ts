@@ -10,152 +10,194 @@ export type Description = {
     longDescription: string;
 };
 
+export interface PackageConstructor {
+    packageName: string;
+    source?: string;
+    version: string;
+    section: string;
+    priority: string;
+    architecture: string;
+    essential?: string;
+    dependencies: Dependency[];
+    dependingPackageNames: string[]; // Exists because we cannot serialize dependingPackages when JSON'ing
+    dependingPackages: Package[];
+    dependenciesString?: string;
+    preDependenciesString?: string;
+    recommends?: string;
+    suggests?: string;
+    enhances?: string;
+    preDependencies: Dependency[];
+    installedSize: number;
+    maintainer: string;
+    homePage?: string;
+    description: Description;
+    status: string;
+    multiArch?: string;
+    replaces?: string;
+    provides?: string;
+    conflicts?: string;
+    confFiles?: string;
+    breaks?: string;
+    originalMaintainer?: string;
+    providesString?: string;
+    extraFields: ExtraFields[];
+}
+
 export class Package {
 
-    public packageName: string;
-    public source?: string;
-    public version: string;
-    public section: string;
-    public priority: string;
-    public architecture: string;
-    public essential?: string;
-    public dependencies: Dependency[] = [];
-    public dependingPackageNames: string[] = []; // Exists because we cannot serialize dependingPackages when JSON'ing
-    public dependingPackages: Package[] = [];
-    public dependenciesString?: string;
-    public preDependenciesString?: string;
-    public recommends?: string;
-    public suggests?: string;
-    public enhances?: string;
-    public preDependencies: Dependency[] = [];
-    public installedSize: number;
-    public maintainer: string;
-    public homePage?: string;
-    public description: Description;
-    public status: string;
-    public multiArch?: string;
-    public replaces?: string;
-    public provides?: string;
-    public conflicts?: string;
-    public confFiles?: string;
-    public breaks?: string;
-    public originalMaintainer?: string;
-    public providesString?: string;
-    public extraFields: ExtraFields[] = []
+    private _packageName: string;
+    private _source?: string;
+    private _version: string;
+    private _section: string;
+    private _priority: string;
+    private _architecture: string;
+    private _essential?: string;
+    private _dependencies: Dependency[] = [];
+    private _dependingPackageNames: string[] = []; // Exists because we cannot serialize dependingPackages when JSON'ing
+    private _dependingPackages: Package[] = [];
+    private _dependenciesString?: string;
+    private _preDependenciesString?: string;
+    private _recommends?: string;
+    private _suggests?: string;
+    private _enhances?: string;
+    private _preDependencies: Dependency[] = [];
+    private _installedSize: number;
+    private _maintainer: string;
+    private _homePage?: string;
+    private _description: Description;
+    private _status: string;
+    private _multiArch?: string;
+    private _replaces?: string;
+    private _provides?: string;
+    private _conflicts?: string;
+    private _confFiles?: string;
+    private _breaks?: string;
+    private _originalMaintainer?: string;
+    private _providesString?: string;
+    private _extraFields: ExtraFields[] = []
 
 
-    constructor(obj: any) {
-        this.packageName = obj.packageName;
-        this.status = obj.status;
-        this.priority = obj.priority;
-        this.section = obj.section;
-        this.installedSize = obj.installedSize;
-        this.maintainer = obj.maintainer;
-        this.architecture = obj.architecture;
-        this.version = obj.version;
-        this.description = obj.description;
-        this.source = obj.source;
-        this.multiArch = obj.multiArch;
-        this.essential = obj.essential;
-        this.dependingPackageNames = obj.dependingPackageNames;
-        this.dependingPackages = obj.dependingPackages;
-        this.dependencies = obj.dependencies;
-        this.preDependencies = obj.preDependencies;
-        this.replaces = obj.replaces;
-        this.provides = obj.provides;
-        this.dependenciesString = obj.dependenciesString;
-        this.preDependenciesString = obj.preDependenciesString;
-        this.recommends = obj.recommends;
-        this.conflicts = obj.conflicts;
-        this.confFiles = obj.confFiles;
-        this.suggests = obj.suggests;
-        this.breaks = obj.breaks;
-        this.originalMaintainer = obj.originalMaintainer;
-        this.homePage = obj.homePage;
-        this.breaks = obj.breaks;
-        this.enhances = obj.enhances;
-        this.providesString = obj.providesString;
-        this.extraFields = obj.extraFields;
+    constructor(obj: PackageConstructor) {
+        this._packageName = obj.packageName;
+        this._status = obj.status;
+        this._priority = obj.priority;
+        this._section = obj.section;
+        this._installedSize = obj.installedSize;
+        this._maintainer = obj.maintainer;
+        this._architecture = obj.architecture;
+        this._version = obj.version;
+        this._description = obj.description;
+        this._source = obj.source;
+        this._multiArch = obj.multiArch;
+        this._essential = obj.essential;
+        this._dependingPackageNames = obj.dependingPackageNames;
+        this._dependingPackages = obj.dependingPackages;
+        this._dependencies = obj.dependencies;
+        this._preDependencies = obj.preDependencies;
+        this._replaces = obj.replaces;
+        this._provides = obj.provides;
+        this._dependenciesString = obj.dependenciesString;
+        this._preDependenciesString = obj.preDependenciesString;
+        this._recommends = obj.recommends;
+        this._conflicts = obj.conflicts;
+        this._confFiles = obj.confFiles;
+        this._suggests = obj.suggests;
+        this._breaks = obj.breaks;
+        this._originalMaintainer = obj.originalMaintainer;
+        this._homePage = obj.homePage;
+        this._breaks = obj.breaks;
+        this._enhances = obj.enhances;
+        this._providesString = obj.providesString;
+        this._extraFields = obj.extraFields;
     };
 
-    public getPackageName(): string {
-        return this.packageName;
-    };
+    public get packageName(): string {
+        return this._packageName;
+    }
 
-    public setPackageName(packageName: string) {
-        this.packageName = packageName;
-    };
 
-    public getDependingPackageNames(): string[] {
-        return this.dependingPackageNames;
-    };
+    public set packageName(packageName: string) {
+        this._packageName = packageName;
+    }
 
-    public setDependingPackageNames(dependingPackageNames: string[]) {
-        this.dependingPackageNames = dependingPackageNames;
-    };
+    public get dependingPackages(): Package[] {
+        return this._dependingPackages;
+    }
 
-    public getDependencies(): Dependency[] {
-        return this.dependencies;
-    };
+    public set dependingPackages(dependingPackages: Package[]) {
+        this._dependingPackages = dependingPackages;
+    }
 
-    public setDependencies(dependencies: Dependency[]) {
-        this.dependencies = dependencies;
-    };
+    public get dependingPackageNames(): string[] {
+        return this._dependingPackageNames;
+    }
 
-    public getPreDependencies(): Dependency[] {
-        return this.preDependencies;
-    };
+    public set dependingPackageNames(dependingPackageNames: string[]) {
+        this._dependingPackageNames = dependingPackageNames;
+    }
 
-    public setPreDependencies(preDependencies: Dependency[]) {
-        this.preDependencies = preDependencies;
-    };
+    public get dependencies(): Dependency[] {
+        return this._dependencies;
+    }
 
-    public getDependenciesString(): string | undefined {
-        return this.dependenciesString;
-    };
+    public set dependencies(dependencies: Dependency[]) {
+        this._dependencies = dependencies;
+    }
 
-    public setDependenciesString(dependenciesString: string) {
-        this.dependenciesString = dependenciesString;
-    };
+    public get preDependencies(): Dependency[] {
+        return this._preDependencies;
+    }
 
-    public getPreDependenciesString(): string | undefined {
-        return this.dependenciesString;
-    };
+    public set preDependencies(preDependencies: Dependency[]) {
+        this._preDependencies = preDependencies;
+    }
 
-    public setPreDependenciesString(dependenciesString: string) {
-        this.dependenciesString = dependenciesString;
-    };
+    public get preDependenciesString(): string | undefined {
+        return this._preDependenciesString;
+    }
+
+    public set preDependenciesString(preDependenciesString: string | undefined) {
+        this._preDependenciesString = preDependenciesString;
+    }
+
+    public get dependenciesString(): string | undefined {
+        return this._dependenciesString;
+    }
+
+    public set dependenciesString(dependenciesString: string | undefined) {
+        this._dependenciesString = dependenciesString;
+    }
 
     /* Workaround for JSON serializing, add fields here that you wish to serialize into JSON */
-    public getDTO(): Object {
+    private getDTO(): Object {
         return {
             packageName: this.packageName,
-            source: this.source,
-            version: this.version,
-            section: this.section,
-            priority: this.priority,
-            architecture: this.architecture,
-            essential: this.essential,
-            dependencies: this.dependencies,
-            recommends: this.recommends,
-            suggests: this.suggests,
-            enhances: this.enhances,
-            preDependencies: this.preDependencies,
-            installedSize: this.installedSize,
-            maintainer: this.maintainer,
-            homePage: this.homePage,
-            description: this.description,
-            status: this.status,
-            multiArch: this.multiArch,
-            dependingPackageNames: this.dependingPackageNames,
-            replaces: this.replaces,
-            provides: this.provides,
-            conflicts: this.conflicts,
-            confFiles: this.confFiles,
-            breaks: this.breaks,
-            originalMaintainer: this.originalMaintainer,
-            providesString: this.providesString,
-            extraFields: this.extraFields
+            source: this._source,
+            version: this._version,
+            section: this._section,
+            priority: this._priority,
+            architecture: this._architecture,
+            essential: this._essential,
+            dependencies: this._dependencies,
+            recommends: this._recommends,
+            suggests: this._suggests,
+            enhances: this._enhances,
+            preDependencies: this._preDependencies,
+            installedSize: this._installedSize,
+            maintainer: this._maintainer,
+            homePage: this._homePage,
+            description: this._description,
+            status: this._status,
+            multiArch: this._multiArch,
+            dependingPackageNames: this._dependingPackageNames,
+            replaces: this._replaces,
+            provides: this._provides,
+            conflicts: this._conflicts,
+            confFiles: this._confFiles,
+            breaks: this._breaks,
+            originalMaintainer: this._originalMaintainer,
+            providesString: this._providesString,
+            extraFields: this._extraFields
         };
     };
 

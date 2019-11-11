@@ -1,4 +1,4 @@
-import { Package, Description, ExtraFields } from "./package";
+import { Package, Description, ExtraFields, PackageConstructor } from "./package";
 import { Dependency } from "./dependency";
 import { AlternativeDependency } from "./alternativeDependency";
 const fs = require('fs');
@@ -67,7 +67,7 @@ export namespace PackageParser {
             .forEach(([fieldNameInFile, value]) => {
                 const propertyEquivalentObj = fieldNamePropertyEquivalents[fieldNameInFile];
                 if (propertyEquivalentObj) {
-                    const propertyName = propertyEquivalentObj.propertyEquivalent;
+                    const propertyName = propertyEquivalentObj.propertyEquivalent
                     const valueParser = propertyEquivalentObj.valueParser;
                     if (valueParser) {
                         value = valueParser(value);
@@ -198,7 +198,7 @@ export namespace PackageParser {
         return { synopsis: synopsis, longDescription: longDescription };
     };
 
-    const fieldNamePropertyEquivalents: { [key: string]: { propertyEquivalent: keyof Package, valueParser?: Function } } = {
+    const fieldNamePropertyEquivalents: { [key: string]: { propertyEquivalent: keyof PackageConstructor, valueParser?: Function } } = {
         'Package': { propertyEquivalent: 'packageName' },
         'Status': { propertyEquivalent: 'status' },
         'Priority': { propertyEquivalent: 'priority' },
