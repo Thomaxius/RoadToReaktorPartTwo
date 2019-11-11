@@ -23,7 +23,7 @@ export namespace PackageParser {
         }
         if (hasWindowsLineEndings(data)) {
             data = data.replace(/\r\n/g, "\n");
-            console.warn("Warning: loaded file contains windows-style line endings. Convert to Linux (LF) if there are problems.")
+            console.warn("Warning: loaded file contains windows-style line endings. Lines were converted, but convert them to Linux (LF) manually if there are problems.")
         }
         return data;
     };
