@@ -46,23 +46,28 @@ export const singlePackageTemplate = {
                     <h3>Dependencies ({{dependencies.length}})</h3> 
                     {{#each dependencies}}
                       {{#if this.isInstalled}}
-                        <a href="/package/{{this.packageName}}">{{this.packageName}}</a>
+                        <a href="/package/{{this.packageName}}">{{this.packageName}}</a>{{#unless @last}},{{/unless}}
                       {{/if}}
                       {{#unless this.isInstalled}}
-                        {{this.packageName}}
+                        {{this.packageName}}{{#unless @last}},{{/unless}}
                       {{/unless}}
-                      {{#each alternatives}}
-                        {{#if this.isInstalled}}
-                            <a href="/package/{{this.packageName}}">{{this.packageName}}</a>
+                      {{#if alternatives.length}}
+                      <i>
+                        {{#each alternatives}}
+                          {{#if this.isInstalled}}
+                              *<a href="/package/{{this.packageName}}">{{this.packageName}}</a>{{#unless @last}},{{/unless}}
+                          {{/if}}
+                          {{#unless this.isInstalled}}
+                              *{{this.packageName}}{{#unless @last}},{{/unless}}
+                          {{/unless}}                     
+                        {{/each}}
+                      </i>
                         {{/if}}
-                        {{#unless this.isInstalled}}
-                            {{this.packageName}}
-                        {{/unless}}                      
-                      {{/each}} 
-                    {{/each}}               
+                    {{/each}} 
+                    <p><i>\* indicates an alternative dependency. </i></p>           
                       <h3>Packages that depend on {{ packageName }} ({{dependingPackageNames.length}})</h3> 
                           {{#each dependingPackageNames}}
-                          <a href=/package/{{this}}>{{this}}</a>
+                          <a href=/package/{{this}}>{{this}}</a>{{#unless @last}},{{/unless}}
                       {{/each}}
                 </div>`
 }
