@@ -79,6 +79,10 @@ export namespace PackageParser {
 
             })
 
+        if (!isValidPackageConstructor(argumentsObj)) {
+            throw new Error(`Error: file contains invalid package(s) that are missing required fields. Failing package: ${JSON.stringify(argumentsObj)}`)
+        }
+
         const _package = new Package(argumentsObj);
         return _package;
     }
@@ -197,6 +201,19 @@ export namespace PackageParser {
 
         return { synopsis: synopsis, longDescription: longDescription };
     };
+
+    const isValidPackageConstructor = (obj: any): obj is PackageConstructor => {
+        const p: PackageConstructor = obj
+        return typeof p.packageName === "string"
+            && typeof p.status === "string"
+            && typeof p.priority === "string"
+            && typeof p.section === "string"
+            && typeof p.installedSize === "number"
+            && typeof p.maintainer === "string"
+            && typeof p.architecture === "string"
+            && typeof p.version === "string"
+            && typeof p.description === "object";
+    }
 
     const fieldNamePropertyEquivalents: { [key: string]: { propertyEquivalent: keyof PackageConstructor, valueParser?: Function } } = {
         'Package': { propertyEquivalent: 'packageName' },
