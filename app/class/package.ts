@@ -1,6 +1,6 @@
 import { Dependency } from "./dependency";
 
-export interface ExtraFields {
+export type ExtraFields = {
     fieldName: string;
     value: string;
 };
