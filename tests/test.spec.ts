@@ -74,4 +74,13 @@ describe('Package parser mock status file tests', () => {
     });
 
 
+    it('Passing invalid values to package constructor should cause an error', () => {
+        const argumentsObj = {} as any
+        argumentsObj['invalidField'] = 'value'
+        expect(() => {
+            new Package(argumentsObj)
+        }).to.throw(`Invalid object passed to constructor: {"invalidField":"value"}`);
+        expect(packages.length).to.equal(8);
+    });
+
 });
