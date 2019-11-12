@@ -56,7 +56,6 @@ export namespace PackageParser {
     const splitAtEOL = (packageItem: string): string[] => packageItem.split(/\n(?!\s)/);
 
     const fromFieldsAndValues = (fieldsAndValues: string[]): Package => {
-
         let argumentsObj = {} as any;
         const extraFields: ExtraFields[] = [];
         argumentsObj.extraFields = extraFields;
@@ -79,12 +78,18 @@ export namespace PackageParser {
 
             })
 
-        if (!isValidPackageConstructor(argumentsObj)) {
-            throw new Error(`Error: file contains invalid package(s) that are missing required fields. Failing package: ${JSON.stringify(argumentsObj)}`)
-        }
 
-        const _package = new Package(argumentsObj);
-        return _package;
+        try {
+            const _package = new Package(argumentsObj);
+            return _package;
+        }
+        catch (error) {
+            if (error instanceof TypeError) {
+                throw new Error(`File contains invalid package(s) that are missing required or have invalid fields. Failing package: ${JSON.stringify(argumentsObj)}`)
+            } else {
+                throw error;
+            }
+        }
     }
 
     const isValid = (_fieldAndValue: string): boolean => _fieldAndValue.length !== 0
@@ -202,18 +207,7 @@ export namespace PackageParser {
         return { synopsis: synopsis, longDescription: longDescription };
     };
 
-    const isValidPackageConstructor = (obj: any): obj is PackageConstructor => {
-        const p: PackageConstructor = obj
-        return typeof p.packageName === "string"
-            && typeof p.status === "string"
-            && typeof p.priority === "string"
-            && typeof p.section === "string"
-            && typeof p.installedSize === "number"
-            && typeof p.maintainer === "string"
-            && typeof p.architecture === "string"
-            && typeof p.version === "string"
-            && typeof p.description === "object";
-    }
+
 
     const fieldNamePropertyEquivalents: { [key: string]: { propertyEquivalent: keyof PackageConstructor, valueParser?: Function } } = {
         'Package': { propertyEquivalent: 'packageName' },

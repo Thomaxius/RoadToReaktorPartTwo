@@ -78,6 +78,9 @@ export class Package {
 
 
     constructor(obj: PackageConstructor) {
+        if (!isValidPackageConstructor(obj)) {
+            throw new TypeError(`Invalid object passed to constructor: ${JSON.stringify(obj)}`)
+        }
         this._packageName = obj.packageName;
         this._status = obj.status;
         this._priority = obj.priority;
@@ -205,3 +208,17 @@ export class Package {
         return this.getDTO();
     };
 };
+
+
+export const isValidPackageConstructor = (obj: any): obj is PackageConstructor => {
+    const p: PackageConstructor = obj
+    return typeof p.packageName === "string"
+        && typeof p.status === "string"
+        && typeof p.priority === "string"
+        && typeof p.section === "string"
+        && typeof p.installedSize === "number"
+        && typeof p.maintainer === "string"
+        && typeof p.architecture === "string"
+        && typeof p.version === "string"
+        && typeof p.description === "object";
+}
